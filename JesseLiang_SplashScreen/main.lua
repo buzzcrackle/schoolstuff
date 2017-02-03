@@ -1,7 +1,10 @@
 for i=0, 1000, 1 do
 	local x = math.random(0, 320)
 	local y = math.random(0, 480)
-	display.newImage("background.jpg", x, y)
+	local rand = math.random(0, 10)
+	local back = display.newImage("background.jpg", x, y)
+	back:scale(rand/3, rand/3)
+	back.rotation = math.random(-30,30)
 end
 
 local cpu = display.newImage("amd.png", 70, 50)
