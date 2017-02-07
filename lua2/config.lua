@@ -1,5 +1,3 @@
--- config.lua
-
 application =
 {
 	content =
