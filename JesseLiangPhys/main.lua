@@ -49,19 +49,22 @@ function boom(v1, v2, x, y)
 	display.remove(boomboom)
 
 	local c = {}
+	local const = 100
+	local inc = 1/const
 
-	for i = 1, 100 do
-		rand = math.random(1, 4)
-		if rand < 3 then
-			x2 = x
-			y2 = y - i
-			x3 = 0.5
-			y3 = 0.5
+	for i = 0, const do
+		rand = math.random(0, const * 2)
+		other = math.random(0, 1)
+
+		x2 = (i * inc) + (x - 0.5)
+		y2 = rand/const + (y - 0.5)
+
+		x3 = (i * inc) - 0.5
+
+		if other == 0 then
+			y3 = math.sqrt(0.25 - math.pow(x3, 2))
 		else
-			x2 = x + i
-			y2 = y
-			x3 = -0.5
-			y3 = -0.5
+			y3 = -1 * math.sqrt(0.25 - math.pow(x3, 2))
 		end
 
 		c[i] = display.newCircle(x2, y2, 2)
@@ -81,11 +84,11 @@ function apocalypse()
 	local c1 = display.newCircle(x,y, 10)
 	local c2 = display.newCircle(x,y, 9)
 		c2:setFillColor(0.9,0.4,0)
-	saem(c1, 100, 800)
-	saem(c2, 100, 800)
+	saem(c1, 100, 500)
+	saem(c2, 100, 500)
 
-	timer.performWithDelay(math.random(0, 10000), boom(c1, c2, x, y))
+	boom(c1, c2, x, y)
 
 end
 
-timer.performWithDelay(5000, apocalypse)
+timer.performWithDelay(3000, apocalypse)
