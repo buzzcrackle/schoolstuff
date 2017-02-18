@@ -49,22 +49,27 @@ function boom(v1, v2, x, y)
 	display.remove(boomboom)
 
 	local c = {}
-	local const = 100
-	local inc = 1/const
+	local const = 200
+	local speed = 0.05
+	local move = (speed * 2)/const
+
+	local dis = 1
+	local inc = (dis * 2)/const
 
 	for i = 0, const do
 		rand = math.random(0, const * 2)
 		other = math.random(0, 1)
 
-		x2 = (i * inc) + (x - 0.5)
-		y2 = rand/const + (y - 0.5)
-
-		x3 = (i * inc) - 0.5
+		x2b = (i * inc)
+		x2 = x2b + (x - dis)
+		x3 = (i * move) - speed
 
 		if other == 0 then
-			y3 = math.sqrt(0.25 - math.pow(x3, 2))
+			y3 = math.sqrt(math.pow(speed, 2) - math.pow(x3, 2))
+			y2 = math.sqrt(math.pow(dis, 2) - math.pow(x2b - 1, 2)) + (y - dis)
 		else
-			y3 = -1 * math.sqrt(0.25 - math.pow(x3, 2))
+			y3 = -1 * math.sqrt(math.pow(speed, 2) - math.pow(x3, 2))
+			y2 = -1 * math.sqrt(math.pow(dis, 2) - math.pow(x2b - 1, 2)) + (y - dis)
 		end
 
 		c[i] = display.newCircle(x2, y2, 2)
@@ -73,22 +78,22 @@ function boom(v1, v2, x, y)
 		c[i]:applyLinearImpulse(x3, y3, c[i].x, c[i].y)
 	end
 
-	transition.fadeOut(v1, {time=4000})
-	transition.fadeOut(v2, {time=4000})
+	-- transition.fadeOut(v1, {time=4000})
+	-- transition.fadeOut(v2, {time=4000})
 
 end
 
 function apocalypse()
 	local x, y = boomboom:localToContent(0,0)
 
-	local c1 = display.newCircle(x,y, 10)
-	local c2 = display.newCircle(x,y, 9)
-		c2:setFillColor(0.9,0.4,0)
-	saem(c1, 100, 500)
-	saem(c2, 100, 500)
+	-- local c1 = display.newCircle(x,y, 10)
+	-- local c2 = display.newCircle(x,y, 9)
+	-- 	c2:setFillColor(0.9,0.4,0)
+	-- saem(c1, 100, 500)
+	-- saem(c2, 100, 500)
 
 	boom(c1, c2, x, y)
 
 end
 
-timer.performWithDelay(3000, apocalypse)
+timer.performWithDelay(1300, apocalypse)
