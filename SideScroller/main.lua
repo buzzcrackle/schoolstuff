@@ -1,4 +1,5 @@
 physics = require("physics")
+physics.start()
 
 local ground = display.newRect(240, 320, 600, 0)
 local obg = display.newRect(240, 160, 600, 320)
@@ -14,6 +15,7 @@ local b1 = {}
 	b1[3] = display.newImage("b2.png", 1160, 160)
 
 local updatebool = false
+local mid = false
 
 local cact = {}
 
@@ -44,8 +46,11 @@ local sequenceData =
 
 local sprite = graphics.newImageSheet("sprite.png", settings)
 local dude = display.newSprite(sprite, sequenceData)
-dude.x=0
-dude.y=260
+	dude.x = 100
+	dude.y = 270
+	physics.addBody(dude, {radius=50, density=1, friction=1, bounce=0})
+
+
 function bg(arr, speed, x1, x2)
 	for i = 1, table.maxn(arr) do
 		arr[i].x = arr[i].x - speed
@@ -58,7 +63,6 @@ end
 function cacti()
 
 	local new = display.newImage("cactus.png", 600, 300)
-		new:scale(0.07, 0.07)
 	table.insert(cact, new)
 	physics.addBody(cact[table.maxn(cact)], "static")
 
@@ -98,9 +102,6 @@ end
 		t2:setFillColor(0,0,0)
 
 -- LAUNCH SCREEN -------------------------
-
-
-physics.start()
 
 physics.addBody(ground, "static")
 
@@ -151,10 +152,27 @@ function tap()
 		timer.performWithDelay(2000, cacti)
 		updatebool = true
 		dude:play()
-
-
 	else
+		if mid == true then
+		else
+			mid = true
+			dude:applyLinearImpulse(0, -100, dude.x, dude.y)
+		end
 	end
 end
+
+
+local function onLocalCollision( self, event )
+ 
+    if ( event.phase == "began" ) then
+        print("collide")
+ 
+    elseif ( event.phase == "ended" ) then
+        mid = false
+    end
+end
+
+dude.collision = onLocalCollision
+dude:addEventListener( "collision" )
 
 Runtime:addEventListener("tap", tap)
