@@ -17,6 +17,14 @@ local updatebool = false
 
 local cact = {}
 
+local settings =
+{
+    width = 100,
+    height = 100,
+    numFrames = 7,
+}
+
+
 local sequenceData =
 {
     {
@@ -33,9 +41,11 @@ local sequenceData =
 	}, 
 
 }
- 
-local dude = display.newSprite("sprite.png", sequenceData)
 
+local sprite = graphics.newImageSheet("sprite.png", settings)
+local dude = display.newSprite(sprite, sequenceData)
+dude.x=0
+dude.y=260
 function bg(arr, speed, x1, x2)
 	for i = 1, table.maxn(arr) do
 		arr[i].x = arr[i].x - speed
@@ -95,10 +105,8 @@ physics.start()
 physics.addBody(ground, "static")
 
 
-
 function boom(x, y)
 
-	dead = true
 
 	local c = {}
 	local const = 200
@@ -132,8 +140,6 @@ function boom(x, y)
 
 end
 
---boom(240, 160)
-
 timer.performWithDelay(1, update, -1)
 
 function tap()
@@ -144,6 +150,8 @@ function tap()
 
 		timer.performWithDelay(2000, cacti)
 		updatebool = true
+		dude:play()
+
 
 	else
 	end
