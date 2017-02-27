@@ -15,9 +15,9 @@ local b1 = {}
 	b1[3] = display.newImage("b2.png", 1160, 160)
 
 local updatebool = false
-local mid = false
+local started = false
+local why = false
 
-local cact = {}
 
 local settings =
 {
@@ -48,7 +48,7 @@ local sprite = graphics.newImageSheet("sprite.png", settings)
 local dude = display.newSprite(sprite, sequenceData)
 	dude.x = 100
 	dude.y = 270
-	physics.addBody(dude, {radius=50, density=1, friction=1, bounce=0})
+	physics.addBody(dude, {density=1, friction=1, bounce=0})
 
 
 function bg(arr, speed, x1, x2)
@@ -60,17 +60,50 @@ function bg(arr, speed, x1, x2)
 	end
 end
 
-function cacti()
+--UNNECESSARY, WORKS, BUT COOL -----------------------------------
 
-	local new = display.newImage("cactus.png", 600, 300)
-	table.insert(cact, new)
-	physics.addBody(cact[table.maxn(cact)], "static")
+-- function cacti()
 
-	local ran = math.random(3000, 6000)
-	timer.performWithDelay(ran, cacti)
-	print(ran)
+-- 	local new = display.newImage("cactus.png", 600, 300)
+-- 	table.insert(cact, new)
+-- 	physics.addBody(cact[table.maxn(cact)], "static")
+
+-- 	local ran = math.random(3000, 6000)
+-- 	timer.performWithDelay(ran, cacti)
+-- 	print(ran)
+
+-- end
+
+--UNNECESSARY BUT COOL -----------------------------------
+
+-- LAUNCH SCREEN -----------------------
+function screen(x)
+
+	if x == true then
+		launch = display.newRect(240, 160, 600, 320)
+			launch:setFillColor(0.8, 0.8, 0.8)
+			launch.alpha = 0.7
+
+		t1 = display.newText("Play Game", 240, 130, "Comic Sans MS", 100)
+			t1:setFillColor(0,0,0)
+		t2 = display.newText("Tap Screen to Start", 240, 220, "Comic Sans MS", 20)
+			t2:setFillColor(0,0,0)
+	else
+		display.remove(launch)
+		display.remove(t1)
+		display.remove(t2)
+	end
 
 end
+-- LAUNCH SCREEN -------------------------
+
+screen(true)
+
+local cact = display.newImage("cactus.png", 600, 300)
+physics.addBody(cact, "static", {bounce = 0})
+
+physics.addBody(ground, "static", {bounce = 0})
+
 
 function update()
 
@@ -78,40 +111,31 @@ function update()
 		bg(b1, 5, -239, 1160)
 		bg(b2, 2, -525, 1160)
 
-		if table.maxn(cact) ~= 0 and cact[1].x < -100 then
-			table.remove(cact, 1)
-		end
+		cact.x = cact.x - 7
 
-		for i = 1, table.maxn(cact) do
-			cact[i].x = cact[i].x - 6
+		if cact.x < -100 then
+			cact.x = math.random(600, 800)
 		end
+	end
 
+	if started == true and updatebool == false then
+		print(dude.x)
+		boom(dude.x, dude.y)
+
+		
+		started = false
 	end
 
 end
 
--- LAUNCH SCREEN -----------------------
-
-	launch = display.newRect(240, 160, 600, 320)
-		launch:setFillColor(0.8, 0.8, 0.8)
-		launch.alpha = 0.7
-
-	t1 = display.newText("Play Game", 240, 130, "Comic Sans MS", 100)
-		t1:setFillColor(0,0,0)
-	t2 = display.newText("Tap Screen to Start", 240, 220, "Comic Sans MS", 20)
-		t2:setFillColor(0,0,0)
-
--- LAUNCH SCREEN -------------------------
-
-physics.addBody(ground, "static")
-
 
 function boom(x, y)
 
+	display.remove(dude)
 
 	local c = {}
-	local const = 200
-	local speed = 0.0001
+	local const = 100
+	local speed = 0.01
 	local move = (speed * 2)/const
 
 	local dis = 1
@@ -133,6 +157,8 @@ function boom(x, y)
 			y2 = -1 * math.sqrt(math.pow(dis, 2) - math.pow(x2b - 1, 2)) + (y - dis)
 		end
 
+		print(x2)
+
 		c[i] = display.newCircle(x2, y2, 2)
 		c[i]:setFillColor(0.8, 0, 0)
 		physics.addBody(c[i], {radius=2, density=0.5, friction=0.5, bounce=0.7})
@@ -144,35 +170,46 @@ end
 timer.performWithDelay(1, update, -1)
 
 function tap()
-	if updatebool == false then
-		t1.alpha = 0
-		t2.alpha = 0
-		launch.alpha = 0
 
-		timer.performWithDelay(2000, cacti)
+	if started == false then
+		started = true
+	end
+
+	if updatebool == false then
+		screen(false)
+
 		updatebool = true
 		dude:play()
 	else
-		if mid == true then
+		if why == true then
 		else
-			mid = true
-			dude:applyLinearImpulse(0, -100, dude.x, dude.y)
+			why = true
+			dude:applyLinearImpulse(0, -120, dude.x, dude.y)
 		end
 	end
 end
 
 
 local function onLocalCollision( self, event )
- 
     if ( event.phase == "began" ) then
-        print("collide")
+        collide = true
  
     elseif ( event.phase == "ended" ) then
-        mid = false
+        why = false
+    end
+end
+
+local function cactcol( self, event )
+    if ( event.phase == "began" ) then
+        updatebool = false
+    elseif ( event.phase == "ended" ) then
     end
 end
 
 dude.collision = onLocalCollision
-dude:addEventListener( "collision" )
+dude:addEventListener("collision")
+
+cact.collision = cactcol
+cact:addEventListener("collision")
 
 Runtime:addEventListener("tap", tap)
