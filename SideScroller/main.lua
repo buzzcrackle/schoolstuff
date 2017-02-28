@@ -18,10 +18,15 @@ local updatebool = false
 local started = false
 local why = false
 local score = 0
+local thing = false
+local cactspeed = 7
+
+local c = {}
 
 local scoreboard = display.newText(score, 480, 30, "Comic Sans MS", 50)
 	scoreboard:setFillColor(0,0,0)
 
+-- BACKGROUND FUNCTION, VERY UNNECESSARY----------------------------
 
 function bg(arr, speed, x1, x2)
 	for i = 1, table.maxn(arr) do
@@ -46,16 +51,15 @@ end
 
 -- end
 
---UNNECESSARY BUT COOL -----------------------------------
-
 -- LAUNCH SCREEN -----------------------
+
 function screen(x, y)
 
 	if x == true then
 		launch = display.newRect(240, 160, 600, 320)
 			launch:setFillColor(0.8, 0.8, 0.8)
 			launch.alpha = 0.7
-		if y == 0 then
+		if y == false then
 			t1 = display.newText("Play Game", 240, 130, "Comic Sans MS", 100)
 				t1:setFillColor(0,0,0)
 			t2 = display.newText("Tap Screen to Start", 240, 220, "Comic Sans MS", 20)
@@ -73,7 +77,8 @@ function screen(x, y)
 	end
 
 end
--- LAUNCH SCREEN -------------------------
+
+-- PHYSICS ----------------------------
 
 local settings =
 {
@@ -105,15 +110,15 @@ local dude = display.newSprite(sprite, sequenceData)
 	dude.x = 100
 	dude.y = 270
 	physics.addBody(dude, {density=1, friction=1, bounce=0})
+	
 
-screen(true, 0)
+screen(true, false)
 
 local cact = display.newImage("cactus.png", 600, 300)
 physics.addBody(cact, "static", {bounce = 0})
-
 physics.addBody(ground, "static", {bounce = 0})
 
-
+-- UPDATE GAME----------------------------------
 
 function update()
 
@@ -121,35 +126,45 @@ function update()
 		bg(b1, 5, -239, 1160)
 		bg(b2, 2, -525, 1160)
 
-		cact.x = cact.x - 10
+		cact.x = cact.x - cactspeed
 
 		if cact.x < -100 then
 			cact.x = math.random(600, 800)
+			thing = false
 		end
 
-		if cact.x < 100 then
+		if cact.x < 100 and thing == false then
+			thing = true
 			score = score + 1
 			scoreboard.text = score
+			cactspeed = cactspeed + 1
+		end
+
+		if dude.sequence == "jump" and dude.y > 269 then
+			dude:setSequence("walk")
+			dude:play()
 		end
 	end
 
 	if started == true and updatebool == false then
-		print(dude.x)
 		boom(dude.x, dude.y)
-
-		screen(true, score)
+		screen(true, true)
+		cactspeed = 7
+		score = 0
 		started = false
 	end
 
 end
 
+timer.performWithDelay(1, update, -1)
+
+-- BLOOD AND GORE ----------------------------------
 
 function boom(x, y)
 
 	dude.alpha = 0
 	physics.removeBody(dude)
 
-	local c = {}
 	local const = 100
 	local speed = 0.01
 	local move = (speed * 2)/const
@@ -157,7 +172,7 @@ function boom(x, y)
 	local dis = 1
 	local inc = (dis * 2)/const
 
-	for i = 0, const do
+	for i = 1, const do
 		rand = math.random(0, const * 2)
 		other = math.random(0, 1)
 
@@ -173,8 +188,6 @@ function boom(x, y)
 			y2 = -1 * math.sqrt(math.pow(dis, 2) - math.pow(x2b - 1, 2)) + (y - dis)
 		end
 
-		print(x2)
-
 		c[i] = display.newCircle(x2, y2, 2)
 		c[i]:setFillColor(0.8, 0, 0)
 		physics.addBody(c[i], {radius=2, density=0.5, friction=0.5, bounce=0.7})
@@ -183,7 +196,16 @@ function boom(x, y)
 
 end
 
-timer.performWithDelay(1, update, -1)
+-- CLEARS THE BLOOD AND GORE ---------------------------
+
+function clearballs()
+	
+	for i=1, #c do
+	    c[i]:removeSelf()
+	end
+end
+
+-- SCREEN TAP -------------------------
 
 function tap()
 
@@ -193,39 +215,41 @@ function tap()
 
 	if updatebool == false then
 		screen(false)
+		scoreboard.text = score
+
+		dude.x = 100
+		dude.y = 270
+		dude:play()
+		dude.alpha = 1
+		physics.addBody(dude, {density=1, friction=1, bounce=0})
 
 		updatebool = true
-		dude:play()
+		cact.x = math.random(600, 800)
+		why = false
+		clearballs()
 	else
-		if why == true then
+		if dude.sequence == "jump" then
 		else
-			why = true
 			dude:applyLinearImpulse(0, -120, dude.x, dude.y)
+			dude:setSequence("jump")
 		end
 	end
 end
 
+Runtime:addEventListener("tap", tap)
 
-local function onLocalCollision( self, event )
-    if ( event.phase == "began" ) then
-        collide = true
- 
-    elseif ( event.phase == "ended" ) then
-        why = false
-    end
-end
+-- COLLISION ------------------------
 
-local function cactcol( self, event )
-    if ( event.phase == "began" ) then
+local function cactcol(self, event)
+    if (event.phase == "began") then
         updatebool = false
-    elseif ( event.phase == "ended" ) then
+        if why == false then
+			dude:setSequence("walk")
+			dude:play()
+		end
+    elseif (event.phase == "ended") then
     end
 end
-
-dude.collision = onLocalCollision
-dude:addEventListener("collision")
 
 cact.collision = cactcol
 cact:addEventListener("collision")
-
-Runtime:addEventListener("tap", tap)
