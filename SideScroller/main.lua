@@ -17,7 +17,63 @@ local b1 = {}
 local updatebool = false
 local started = false
 local why = false
+local score = 0
 
+local scoreboard = display.newText(score, 480, 30, "Comic Sans MS", 50)
+	scoreboard:setFillColor(0,0,0)
+
+
+function bg(arr, speed, x1, x2)
+	for i = 1, table.maxn(arr) do
+		arr[i].x = arr[i].x - speed
+		if arr[i].x < x1 then	
+			arr[i].x = x2
+		end
+	end
+end
+
+--UNNECESSARY, WORKS, BUT COOL -----------------------------------
+
+-- function cacti()
+
+-- 	local new = display.newImage("cactus.png", 600, 300)
+-- 	table.insert(cact, new)
+-- 	physics.addBody(cact[table.maxn(cact)], "static")
+
+-- 	local ran = math.random(3000, 6000)
+-- 	timer.performWithDelay(ran, cacti)
+-- 	print(ran)
+
+-- end
+
+--UNNECESSARY BUT COOL -----------------------------------
+
+-- LAUNCH SCREEN -----------------------
+function screen(x, y)
+
+	if x == true then
+		launch = display.newRect(240, 160, 600, 320)
+			launch:setFillColor(0.8, 0.8, 0.8)
+			launch.alpha = 0.7
+		if y == 0 then
+			t1 = display.newText("Play Game", 240, 130, "Comic Sans MS", 100)
+				t1:setFillColor(0,0,0)
+			t2 = display.newText("Tap Screen to Start", 240, 220, "Comic Sans MS", 20)
+				t2:setFillColor(0,0,0)
+		else
+			t1 = display.newText("Score: " .. score, 240, 130, "Comic Sans MS", 100)
+				t1:setFillColor(0,0,0)
+			t2 = display.newText("Tap Screen to Try Again", 240, 220, "Comic Sans MS", 20)
+				t2:setFillColor(0,0,0)
+		end
+	else
+		display.remove(launch)
+		display.remove(t1)
+		display.remove(t2)
+	end
+
+end
+-- LAUNCH SCREEN -------------------------
 
 local settings =
 {
@@ -50,59 +106,13 @@ local dude = display.newSprite(sprite, sequenceData)
 	dude.y = 270
 	physics.addBody(dude, {density=1, friction=1, bounce=0})
 
-
-function bg(arr, speed, x1, x2)
-	for i = 1, table.maxn(arr) do
-		arr[i].x = arr[i].x - speed
-		if arr[i].x < x1 then	
-			arr[i].x = x2
-		end
-	end
-end
-
---UNNECESSARY, WORKS, BUT COOL -----------------------------------
-
--- function cacti()
-
--- 	local new = display.newImage("cactus.png", 600, 300)
--- 	table.insert(cact, new)
--- 	physics.addBody(cact[table.maxn(cact)], "static")
-
--- 	local ran = math.random(3000, 6000)
--- 	timer.performWithDelay(ran, cacti)
--- 	print(ran)
-
--- end
-
---UNNECESSARY BUT COOL -----------------------------------
-
--- LAUNCH SCREEN -----------------------
-function screen(x)
-
-	if x == true then
-		launch = display.newRect(240, 160, 600, 320)
-			launch:setFillColor(0.8, 0.8, 0.8)
-			launch.alpha = 0.7
-
-		t1 = display.newText("Play Game", 240, 130, "Comic Sans MS", 100)
-			t1:setFillColor(0,0,0)
-		t2 = display.newText("Tap Screen to Start", 240, 220, "Comic Sans MS", 20)
-			t2:setFillColor(0,0,0)
-	else
-		display.remove(launch)
-		display.remove(t1)
-		display.remove(t2)
-	end
-
-end
--- LAUNCH SCREEN -------------------------
-
-screen(true)
+screen(true, 0)
 
 local cact = display.newImage("cactus.png", 600, 300)
 physics.addBody(cact, "static", {bounce = 0})
 
 physics.addBody(ground, "static", {bounce = 0})
+
 
 
 function update()
@@ -111,10 +121,15 @@ function update()
 		bg(b1, 5, -239, 1160)
 		bg(b2, 2, -525, 1160)
 
-		cact.x = cact.x - 7
+		cact.x = cact.x - 10
 
 		if cact.x < -100 then
 			cact.x = math.random(600, 800)
+		end
+
+		if cact.x < 100 then
+			score = score + 1
+			scoreboard.text = score
 		end
 	end
 
@@ -122,7 +137,7 @@ function update()
 		print(dude.x)
 		boom(dude.x, dude.y)
 
-		
+		screen(true, score)
 		started = false
 	end
 
@@ -131,7 +146,8 @@ end
 
 function boom(x, y)
 
-	display.remove(dude)
+	dude.alpha = 0
+	physics.removeBody(dude)
 
 	local c = {}
 	local const = 100
